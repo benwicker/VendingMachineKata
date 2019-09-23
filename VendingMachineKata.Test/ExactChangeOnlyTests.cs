@@ -21,8 +21,29 @@ namespace VendingMachineKata.Test
         {
             machine.Nickels = 0;
             machine.Dimes = 0;
-            machine.Quarters = 0;
             Assert.AreEqual("EXACT CHANGE ONLY", machine.CheckDisplay());
+        }
+
+        [TestMethod]
+        public void ExactRequiredButNotGiven()
+        {
+            var expectedReturn = new List<string>()
+            {
+                "quarter",
+                "quarter",
+                "quarter",
+            };
+            machine.Nickels = 0;
+            machine.Dimes = 0;
+            foreach (var coin in expectedReturn)
+            {
+                machine.InsertCoin(coin);
+            }
+            machine.SelectItem(2);
+            Assert.AreEqual("EXACT CHANGE ONLY", machine.CheckDisplay());
+            CollectionAssert.AreEqual(expectedReturn, machine.CoinReturn);
+            Assert.AreEqual(0, machine.ItemReturn.Count);
+            
         }
     }
 }

@@ -42,9 +42,8 @@ namespace VendingMachineKata
         {
             ACU = 0;
             VendItems = vendItems;
-            Nickels = 50;
-            Dimes = 50;
-            Quarters = 50;
+            Nickels = 20;
+            Dimes = 20;
         }
 
         public string CheckDisplay() {
@@ -67,9 +66,11 @@ namespace VendingMachineKata
             {
                 case "nickel":
                     ACU += 5;
+                    Nickels++;
                     break;
                 case "dime":
                     ACU += 10;
+                    Dimes++;
                     break;
                 case "quarter":
                     ACU += 25;
@@ -105,6 +106,13 @@ namespace VendingMachineKata
                     return;
                 }
 
+                if (ACU != item.Price && !CanMakeChange())
+                {
+                    ReturnCoins();
+                    Display = "EXACT CHANGE ONLY";
+                    return;
+                }
+
                 VendItem(item.Name);
                 Bank.Clear();
                 ACU -= item.Price;
@@ -129,36 +137,35 @@ namespace VendingMachineKata
         public bool CanMakeChange()
         {
             // determine max amount we would need to make
-            int maxChangeNeeded = 0;
+            int changeNeeded = 0;
             foreach (var item in VendItems)
             {
-                if (item.Price % 25 > maxChangeNeeded)
-                    maxChangeNeeded = item.Price;
+                changeNeeded = item.Price % 25;
+
+                var numDimesAvailable = Dimes;
+                var numNickelsAvailable = Nickels;
+
+                while (changeNeeded > 0)
+                {
+                    if (changeNeeded >= 10 && numDimesAvailable > 0)
+                    {
+                        changeNeeded -= 10;
+                        numDimesAvailable--;
+                    }
+
+                    else if (changeNeeded >= 5 && numNickelsAvailable > 0)
+                    {
+                        changeNeeded -= 5;
+                        numNickelsAvailable--;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
             }
 
-            var numDimesAvailable = Dimes;
-            var numNickelsAvailable = Nickels;
-
-            while (maxChangeNeeded > 0)
-            {
-                if (maxChangeNeeded >= 10 && numDimesAvailable > 0)
-                {
-                    maxChangeNeeded -= 10;
-                    numDimesAvailable--;
-                }
-
-                else if (maxChangeNeeded >= 5 && numNickelsAvailable > 0)
-                {
-                    maxChangeNeeded -= 5;
-                    numNickelsAvailable--;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return maxChangeNeeded == 0;
+            return true;
         }
 
         public void MakeChange()
@@ -170,14 +177,16 @@ namespace VendingMachineKata
                     ReturnCoin("quarter");
                     ACU -= 25;
                 }
-                else if (ACU >= 10)
+                else if (ACU >= 10 && Dimes > 0)
                 {
                     ReturnCoin("dime");
                     ACU -= 10;
+                    Dimes--;
                 }
-                else if (ACU >= 05) {
+                else if (ACU >= 5 && Nickels > 0) {
                     ReturnCoin("nickel");
                     ACU -= 05;
+                    Nickels--;
                 }
                 else
                 {
