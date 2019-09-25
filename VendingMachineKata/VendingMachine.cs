@@ -42,8 +42,8 @@ namespace VendingMachineKata
         {
             ACU = 0;
             VendItems = vendItems;
-            Nickels = 20;
-            Dimes = 20;
+            Nickels = 10;
+            Dimes = 10;
         }
 
         public string CheckDisplay() {
